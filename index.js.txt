@@ -1,0 +1,39 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Database setup
+const db = new sqlite3.Database(':memory:');
+db.serialize(() => {
+    db.run("CREATE TABLE users (name TEXT, storeCredit REAL)");
+    db.run("CREATE TABLE returns (name TEXT, reason TEXT, amount REAL, date TEXT)");
+});
+
+// Route to handle refund submission
+app.post('/submit-refund', (req, res) => {
+    const { name, reason, amount } = req.body;
+    const refundAmount = parseFloat(amount);
+
+    db.get("SELECT storeCredit FROM users WHERE name = ?", [name], (err, row) => {
+        if (err) return res.status(500).json({ message: 'Database error.' });
+
+        const newCredit = row ? row.storeCredit + refundAmount : refundAmount;
+        if (row) {
+            db.run("UPDATE users SET storeCredit = ? WHERE name = ?", [newCredit, name]);
+        } else {
+            db.run("INSERT INTO users (name, storeCredit) VALUES (?, ?)", [name, newCredit]);
+        }
+
+        db.run("INSERT INTO returns (name, reason, amount, date) VALUES (?, ?, ?, ?)", [name, reason, refundAmount, new Date().toISOString()]);
+
+        res.json({ message: `Refund of $${refundAmount.toFixed(2)} credited to your account as store credit.` });
+    });
+});
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
