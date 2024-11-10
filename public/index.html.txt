@@ -17,19 +17,32 @@
             width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;
         }
         button:hover { background-color: #45a049; }
+        /* Style iframe */
+        .iframe-container { text-align: center; margin-top: 20px; }
     </style>
 </head>
 <body>
     <h1>Auto Refund Form</h1>
+    
     <form id="refundForm">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required>
+        
         <label for="reason">Reason for Refund:</label>
         <textarea id="reason" name="reason" rows="4" required></textarea>
+        
         <label for="amount">Amount:</label>
         <input type="number" id="amount" name="amount" required>
+        
         <button type="submit">Submit Refund Request</button>
     </form>
+    
+    <!-- Adding the iframe here -->
+    <div class="iframe-container">
+        <h2>Holiday Refund App Embed</h2>
+        <iframe src="https://github.com/Guesperts/HolidayRefundApp.git" width="800" height="600" style="border: none;"></iframe>
+    </div>
+
     <script>
         document.getElementById('refundForm').addEventListener('submit', async (e) => {
             e.preventDefault();
